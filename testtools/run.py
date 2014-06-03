@@ -60,7 +60,15 @@ def list_test(test):
         # Much ugly.
         for prefix in unittest_import_strs:
             if test.id().startswith(prefix):
-                errors.append(test.id()[len(prefix):])
+                test_name = (test.id()[len(prefix):])
+                if getattr(test, test_name):
+                    try:
+                        res = getattr(test, test_name)()
+                    except ImportError as e:
+                        failure = str(e)
+                else:
+                    failure = test_name
+                errors.append(failure)
                 break
         else:
             test_ids.append(test.id())
