@@ -54,7 +54,15 @@ def list_test(test):
     for test in iterate_tests(test):
         # to this ugly.
         if test.id().startswith(unittest_import_str):
-            errors.append(test.id()[len(unittest_import_str):])
+            test_name = test.id()[len(unittest_import_str):]
+            if getattr(test, test_name):
+                try:
+                    res = getattr(test, test_name)()
+                except ImportError as e:
+                    failure = str(e)
+            else:
+                failure = test_name
+            errors.append(failure)
         else:
             test_ids.append(test.id())
     return test_ids, errors
