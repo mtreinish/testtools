@@ -108,6 +108,27 @@ def _expectedFailure(func):
     return wrapper
 
 
+def xfail_on_exc(*args, **kwargs):
+    """A test decorator to catch a specific exception and handle it as xfail.
+
+    If an exception is raised other than the expected exception type it will
+    passthrough and be handled like normal.
+
+    :param Exception exc: The exception class to catch and treat as
+    """
+    def decorator(f):
+        if len(args) == 0:
+            raise TypeError('A expected exception needs to be provided')
+        expected_exception = args[0]
+        @functools.wraps(func)
+        def wrapper(self, *func_args, **func_kwargs):
+            try:
+                func(*func_args, **func_kwargs)
+            except expected_exception:
+                raise _ExpectedFailure(sys.exc_info())
+        return wrapper
+
+
 def run_test_with(test_runner, **kwargs):
     """Decorate a test as using a specific ``RunTest``.
 
